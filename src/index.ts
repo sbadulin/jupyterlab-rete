@@ -8,6 +8,7 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import '../style/index.css';
 
+const FILE_TYPES = ['RETE'];
 
 export class ReteWidget extends Widget {
   /**
@@ -98,21 +99,19 @@ const extension: JupyterLabPlugin<void> = {
   autoStart: true,
   requires: [ICommandPalette, IEditorTracker],
   activate: (app: JupyterLab, palette: ICommandPalette, editorTracker: IEditorTracker) => {
-    console.log('JupyterLab extension jupyter-plugin-test is activated!');
-
     const factory = new ReteFactory({
       name: 'Rete Editor',
-      fileTypes: ['*.rete'],
-      defaultFor: ['*']
+      fileTypes: FILE_TYPES,
+      defaultFor: ['*'],
     });
     app.docRegistry.addWidgetFactory(factory);
 
     // Add an application command
     const command: string = 'rete:open';
     app.commands.addCommand(command, {
-      label: 'Rete editor',
+      label: 'Rete Editor',
       execute: () => {
-        let widget = new Widget();
+        const widget = new Widget();
         widget.id = 'lolekek';
         app.shell.addToMainArea(widget);
         // Activate the widget
