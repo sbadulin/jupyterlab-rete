@@ -5,8 +5,6 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { Widget } from '@phosphor/widgets';
 import { UUID } from '@phosphor/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { NodeEditor } from "rete";
-import ConnectionPlugin from 'rete-connection-plugin';
 
 import '../style/index.css';
 
@@ -29,29 +27,29 @@ export class ReteWidget extends Widget {
     
     // editor.on('nodeselected', () => this.context.model.value.text = editor.getValue());
     
-    context.ready.then(() => { this._onContextReady(); });
+    // context.ready.then(() => { this._onContextReady(); });
   }
   
   /**
    * Handle actions that should be taken when the context is ready.
    */
-  private _onContextReady(): void {
-    if (this.isDisposed) {
-        return;
-      }
-    const contextModel = this.context.model;
-    const editor = new NodeEditor('demo@0.1.0', document.querySelector('#rete'));
-    editor.use(ConnectionPlugin);
+  // private _onContextReady(): void {
+  //   if (this.isDisposed) {
+  //       return;
+  //     }
+    // const contextModel = this.context.model;
+    // const editor = new NodeEditor('demo@0.1.0', document.querySelector('#rete'));
+    // editor.use(ConnectionPlugin);
 
     // Set the editor model value.
-    editor.fromJSON(contextModel);
+    // editor.fromJSON(contextModel);
 
     // Wire signal connections.
     // contextModel.contentChanged.connect(this._onContentChanged, this);
 
     // Resolve the ready promise.
     // this._ready.resolve(undefined);
-  }
+  // }
 
   /**
    * A promise that resolves when the file editor is ready.
@@ -80,7 +78,7 @@ export class ReteWidget extends Widget {
   /**
    * A widget factory for editors.
    */
-export class ReteEditorFactory extends ABCWidgetFactory<IDocumentWidget<ReteWidget>, DocumentRegistry.ICodeModel> {
+export class ReteFactory extends ABCWidgetFactory<IDocumentWidget<ReteWidget>, DocumentRegistry.ICodeModel> {
 
   /**
    * Create a new widget given a context.
@@ -102,35 +100,28 @@ const extension: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette, editorTracker: IEditorTracker) => {
     console.log('JupyterLab extension jupyter-plugin-test is activated!');
 
-    const factory = new ReteEditorFactory({
+    const factory = new ReteFactory({
       name: 'Rete Editor',
       fileTypes: ['*.rete'],
       defaultFor: ['*']
     });
     app.docRegistry.addWidgetFactory(factory);
 
-    const widget: Widget = new Widget();
-    console.log(widget);
-    widget.id = 'jupyter-plugin-test';
-    widget.title.label = 'Vega 2';
-    widget.title.closable = true;
-
     // Add an application command
-    const command: string = 'vega:open';
+    const command: string = 'rete:open';
     app.commands.addCommand(command, {
-      label: 'Vega 2 with Rete.js',
+      label: 'Rete editor',
       execute: () => {
-        if (!widget.isAttached) {
-          // Attach the widget to the main work area if it's not there
-          app.shell.addToMainArea(widget);
-        }
+        let widget = new Widget();
+        widget.id = 'lolekek';
+        app.shell.addToMainArea(widget);
         // Activate the widget
         app.shell.activateById(widget.id);
       }
     });
 
     // Add the command to the palette
-    palette.addItem({command, category: 'App'});
+    palette.addItem({command, category: 'Rete'});
   }
 };
 
