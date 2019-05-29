@@ -1,41 +1,79 @@
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+
+import { JSONObject } from '@phosphor/coreutils';
+
+
 import { Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
 
+/**
+ * The default mime type for the extension.
+ */
+const MIME_TYPE = 'application/vnd.gazpromneft.rete';
 
 /**
- * Initialization data for the jupyter-plugin-test extension.
+ * The class name added to the extension.
  */
-const extension: JupyterLabPlugin<void> = {
-  id: 'jupyter-plugin-test',
-  autoStart: true,
-  requires: [ICommandPalette],
-  activate: (app: JupyterLab, palette: ICommandPalette) => {
-    console.log('JupyterLab extension jupyter-plugin-test is activated!');
+const CLASS_NAME = 'mimerenderer-rete';
 
-    const widget: Widget = new Widget();
-    widget.id = 'jupyter-plugin-test';
-    widget.title.label = 'Vega 2';
-    widget.title.closable = true;
+/**
+ * A widget for rendering rete.
+ */
+export class ReteWidget extends Widget implements IRenderMime.IRenderer {
+  /**
+   * Construct a new output widget.
+   */
+  constructor(options: IRenderMime.IRendererOptions) {
+    super();
+    this._mimeType = options.mimeType;
+    this.addClass(CLASS_NAME);
+  }
 
-    // Add an application command
-    const command: string = 'vega:open';
-    app.commands.addCommand(command, {
-      label: 'Vega 2 with Rete.js',
-      execute: () => {
-        if (!widget.isAttached) {
-          // Attach the widget to the main work area if it's not there
-          app.shell.addToMainArea(widget);
-        }
-        // Activate the widget
-        app.shell.activateById(widget.id);
-      }
-    });
+  /**
+   * Render rete into this widget's node. 
+   */
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    
+    let data = model.data[this._mimeType] as JSONObject;
+    this.node.textContent = JSON.stringify(data);
+    
+    return Promise.resolve();
+  }
 
-    // Add the command to the palette
-    palette.addItem({command, category: 'App'});
+  private _mimeType: string;
+}
+
+/**
+ * A mime renderer factory for rete data.
+ */
+export const rendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: [MIME_TYPE],
+  createRenderer: options => new ReteWidget(options)
+};
+
+/**
+ * Extension definition.
+ */
+const extension: IRenderMime.IExtension = {
+  id: 'vega2-mime-plugin:plugin',
+  rendererFactory,
+  rank: 0,
+  dataType: 'json',
+  fileTypes: [
+    {
+      name: 'rete',
+      mimeTypes: [MIME_TYPE],
+      extensions: ['.rete']
+    }
+  ],
+  documentWidgetFactoryOptions: {
+    name: 'Rete.js',
+    primaryFileType: 'rete',
+    fileTypes: ['rete'],
+    defaultFor: ['rete']
   }
 };
 
